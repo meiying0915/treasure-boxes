@@ -7,12 +7,22 @@ if [ -z $(which td) ]; then
   exit 1
 fi
 
-td db:create boston
-td table:create boston house_prices
+DB_NAME="boston"
+TABLE_NAME="house_prices"
+
+if td table:show ${DB_NAME} ${TABLE_NAME} > /dev/null ; then
+  echo "table ${DB_NAME}.${TABLE_NAME} exists. Skip"
+  exit 0
+else
+  echo "Create target table ${DB_NAME}.${TABLE_NAME}"
+fi
+
+td db:create ${DB_NAME}
+td table:create ${DB_NAME} ${TABLE_NAME}
 td import:auto \
   --format csv \
   --column-header \
   --column-types double,double,double,int,double,double,double,double,int,int,double,double,double,double \
   --time-value `date +%s` \
   --delimiter "," \
-  --auto-create boston.house_prices ./resources/boston_house_prices.csv
+  --auto-create ${DB_NAME}.${TABLE_NAME} ./resources/boston_house_prices.csv
